@@ -1,19 +1,56 @@
 -- Phase 1: Role-based access control system
 
 -- Define the 11 roles
-create type if not exists public.role_type as enum (
-  'group_executive',
-  'group_function_head',
-  'gm',
-  'entity_function_lead',
-  'project_manager',
-  'front_end_lead',
-  'back_end_lead',
-  'employee',
-  'client_user',
-  'sub_admin',
-  'system_admin'
-);
+do $$ begin
+  create type public.role_type as enum (
+    'group_executive',
+    'group_function_head',
+    'gm',
+    'entity_function_lead',
+    'project_manager',
+    'front_end_lead',
+    'back_end_lead',
+    'employee',
+    'client_user',
+    'sub_admin',
+    'system_admin'
+  );
+exception when duplicate_object then null;
+end $$;
+
+-- Module types
+do $$ begin
+  create type public.module_type as enum (
+    'crm',
+    'projects',
+    'finance',
+    'hr',
+    'recruitment',
+    'analytics',
+    'support',
+    'documents',
+    'calendar',
+    'invoicing',
+    'workflow',
+    'forms',
+    'tools'
+  );
+exception when duplicate_object then null;
+end $$;
+
+-- Permission levels
+do $$ begin
+  create type public.permission_level as enum (
+    'none',
+    'view',
+    'create',
+    'edit',
+    'approve',
+    'admin',
+    'full'
+  );
+exception when duplicate_object then null;
+end $$;
 
 -- Role definitions
 create table if not exists public.role (
@@ -33,34 +70,6 @@ create table if not exists public.user_role (
   assigned_at timestamp with time zone default now(),
   assigned_by uuid references public.profiles(id),
   unique(user_id, role_id, organization_id)
-);
-
--- Module permissions
-create type if not exists public.module_type as enum (
-  'crm',
-  'projects',
-  'finance',
-  'hr',
-  'recruitment',
-  'analytics',
-  'support',
-  'documents',
-  'calendar',
-  'invoicing',
-  'workflow',
-  'forms',
-  'tools'
-);
-
--- Permission levels
-create type if not exists public.permission_level as enum (
-  'none',
-  'view',
-  'create',
-  'edit',
-  'approve',
-  'admin',
-  'full'
 );
 
 -- Role-Module permissions
@@ -86,7 +95,7 @@ insert into public.role (name, description, scope) values
   ('client_user', 'External client user (BPO HR services)', 'user'),
   ('sub_admin', 'Sub-administrator - limited admin functions', 'group'),
   ('system_admin', 'System Administrator - full technical access', 'group')
-on conflict do nothing;
+on conflict (name) do nothing;
 
 -- Indexes
 create index if not exists idx_user_role_user_id on public.user_role(user_id);

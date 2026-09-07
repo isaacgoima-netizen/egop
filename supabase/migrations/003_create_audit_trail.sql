@@ -1,31 +1,37 @@
 -- Phase 1: Audit trail for compliance and monitoring
 
-create type if not exists public.audit_action as enum (
-  'create',
-  'read',
-  'update',
-  'delete',
-  'approve',
-  'reject',
-  'submit',
-  'login',
-  'logout',
-  'export',
-  'archive'
-);
+do $$ begin
+  create type public.audit_action as enum (
+    'create',
+    'read',
+    'update',
+    'delete',
+    'approve',
+    'reject',
+    'submit',
+    'login',
+    'logout',
+    'export',
+    'archive'
+  );
+exception when duplicate_object then null;
+end $$;
 
-create type if not exists public.audit_entity_type as enum (
-  'organization',
-  'user',
-  'project',
-  'client',
-  'contract',
-  'invoice',
-  'payroll',
-  'leave_request',
-  'role_assignment',
-  'other'
-);
+do $$ begin
+  create type public.audit_entity_type as enum (
+    'organization',
+    'user',
+    'project',
+    'client',
+    'contract',
+    'invoice',
+    'payroll',
+    'leave_request',
+    'role_assignment',
+    'other'
+  );
+exception when duplicate_object then null;
+end $$;
 
 -- Audit log table
 create table if not exists public.audit_log (
